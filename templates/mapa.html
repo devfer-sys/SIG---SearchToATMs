@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapa Cajeros – UPEA</title>
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- Leaflet Routing Machine -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
+
+    <style>
+        html, body { height: 100%; margin: 0; font-family: "Comic Sans MS", cursive; }
+        #map { height: 100%; width: 100%; }
+
+        #btn-index {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            padding: 8px 12px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #000;
+            color: #fff;
+            opacity: 0.85;
+            border: none;
+        }
+        #btn-index:hover { opacity: 1; }
+
+        .popup-btn {
+            display: inline-block;
+            margin-top: 5px;
+            padding: 5px 10px;
+            font-weight: bold;
+            font-family: "Comic Sans MS", cursive;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+            background-color: #000000;
+            color: #ffffff;
+            border: none;
+        }
+        .popup-btn:hover {
+            background-color: #333333;
+        }
+    </style>
+</head>
+<body>
+    <button id="btn-index" onclick="location.href='/'">Volver al índice</button>
+    <div id="map"></div>
+
+    <script>
+        const userLat = {{ lat }};
+        const userLon = {{ lon }};
+        const banco = "{{ banco }}";
+
+        var map = L.map('map').setView([userLat, userLon], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/">OSM</a>',
+            maxZoom: 19
+        }).addTo(map);
+
+        const atmIcon = L.icon({
+            iconUrl: '/static/atm_icon.png',
+            iconSize: [32, 37],
+            iconAnchor: [16, 37],
+            popupAnchor: [0, -30]
+        });
+
+        // Marcador usuario
+        L.circleMarker([userLat, userLon], {
+            radius: 8,
+            color: '#000000',
+            fillColor: '#000000',
+            fillOpacity: 1
+        }).bindPopup("Tu ubicación").addTo(map);
+
+        let rutaLayer = null;
+        let marcadorSeleccionado = null;
+
+        function mostrarRuta(destLat, destLon, marker) {
+            if (rutaLayer) map.removeControl(rutaLayer);
+            if (marcadorSeleccionado) marcadorSeleccionado.setIcon(atmIcon);
+
+            marcadorSeleccionado = marker;
+            marcadorSeleccionado.setIcon(L.icon({
+                iconUrl: '/static/atm_icon.png',
+                iconSize: [40, 45],
+                iconAnchor: [20, 45],
+                popupAnchor: [0, -30]
+            }));
+
+            rutaLayer = L.Routing.control({
+                waypoints: [
+                    L.latLng(userLat, userLon),
+                    L.latLng(destLat, destLon)
+                ],
+                routeWhileDragging: false,
+                showAlternatives: true,
+                lineOptions: { styles: [{ color: '#000000', weight: 5 }] },
+                createMarker: function() { return null; }
+            }).addTo(map);
+        }
+
+        // Cargar cajeros
+        fetch("/buscar", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({lat: userLat, lon: userLon, banco: banco})
+        })
+        .then(res => res.json())
+        .then(data => {
+            data.forEach(atm => {
+                const marker = L.marker([atm.lat, atm.lon], { icon: atmIcon }).addTo(map);
+                const popupContent = document.createElement('div');
+                popupContent.style.textAlign = 'center';
+                popupContent.innerHTML = `
+                    <b>${atm.banco}</b><br>
+                    Dirección: ${atm.direccion}<br>
+                    Distancia: ${atm.distancia} km<br>
+                `;
+                const btn = document.createElement('button');
+                btn.className = 'popup-btn';
+                btn.innerText = 'Cómo llegar';
+                btn.onclick = () => mostrarRuta(atm.lat, atm.lon, marker);
+                popupContent.appendChild(btn);
+                marker.bindPopup(popupContent);
+            });
+        });
+    </script>
+</body>
+</html>

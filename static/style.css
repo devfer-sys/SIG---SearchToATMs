@@ -1,0 +1,87 @@
+/* Fuente general */
+body {
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+}
+
+/* ================= Modo Claro ================= */
+body.fondo {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+body.fondo .borde-upea {
+    border: 2px solid #000000;
+    border-radius: 10px;
+    background-color: #ffffff;
+}
+
+body.fondo .titulo-upea {
+    color: #000000;
+}
+
+body.fondo .btn-upea {
+    background-color: #000000;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+body.fondo .btn-upea:hover {
+    background-color: #333333;
+}
+
+body.fondo .btn-outline-upea {
+    border: 2px solid currentColor;
+    color: currentColor;
+}
+
+/* ================= Modo Oscuro ================= */
+body.fondo-oscuro {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+body.fondo-oscuro .borde-upea-oscuro {
+    border: 2px solid #ffffff;
+    border-radius: 10px;
+    background-color: #111111;
+}
+
+body.fondo-oscuro .titulo-upea {
+    color: #ffffff;
+}
+
+body.fondo-oscuro .btn-upea {
+    background-color: #ffffff;
+    color: #000000;
+    font-weight: bold;
+}
+
+body.fondo-oscuro .btn-upea:hover {
+    background-color: #ffffff;
+    color: #000000;
+    font-weight: bold;
+}
+
+body.fondo-oscuro .btn-outline-upea {
+    border: 2px solid currentColor;
+    color: currentColor;
+}
+/* ---- FOOTER FIJO PERFECTO ---- */
+.footer-fijo {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background: #0b0b0b;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 0.9rem;
+    z-index: 9999;
+    box-shadow: 0 -3px 10px rgba(0,0,0,0.4);
+}
+
+/* --- MUY IMPORTANTE: deja espacio para que el footer no pise el contenido --- */
+body {
+    margin-bottom: 90px !important;   /* altura del footer */
+}
